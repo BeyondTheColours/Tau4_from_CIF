@@ -2,6 +2,8 @@ import sys
 import math
 import re
 
+print()
+
 def get_angle_lines(cif_file_text, atom):
 
     angles_text = cif_file_text.split("_geom_angle_publ_flag\n")[1].split("loop_")[0]
@@ -81,6 +83,8 @@ def get_tau4(cif_file, central_atom):
             f.close()
     
     except FileNotFoundError:
+        print(f"The file path provided:\n -> {cif_file}\nis not valid.")
+        print(f"Please check the path to the .cif is correct.")
         return None
 
     if validate_angle_line_list(angles_lines) is not None:
@@ -112,11 +116,23 @@ except IndexError:
     print(f"Cannot calculate Tau4 for CIF \"{cif}\" because no central atom has been specificed")
     exit()
 
+do_rounding = False
+try:
+    decimal_places = int(sys.argv[3])
+    do_rounding = True
+except IndexError:
+    pass
+except ValueError:
+    print("When entering a number of decimal places for rounding this must a whole number.")
+    print("Calculating Tau4 without rounding...\n")
+
 tau4 = get_tau4(cif, central_atom)
 
 if tau4 is not None:
-    print(tau4)
+    rounding_message = ""
+    if do_rounding == True:
+        tau4 = round(tau4, decimal_places)
+        rounding_message = f"\nRounded to {decimal_places} decimal place{(decimal_places > 1)*'s'}"
+    print(f"Tau4 calculated at {central_atom}:\n{tau4}\n{rounding_message}")
 else:
-    print("Something went wrong")
-
-
+    pass
